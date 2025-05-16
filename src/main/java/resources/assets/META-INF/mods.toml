@@ -1,0 +1,22 @@
+modLoader="javafml"
+loaderVersion="[36,)" # 1.16.5 対応の Forge 用
+license="MIT"
+
+[[mods]]
+modId="fishplayermod"
+version="1.0.0"
+displayName="Fish Player Mod"
+displayURL="https://example.com/fishplayermod"
+logoFile="fish.png" # 省略可能。resources に画像を置く場合。
+authors="お方"
+description='''
+プレイヤーが魚の姿になれるMod。
+サーモン、タラ、フグ、熱帯魚の中から選択して外見を変えることができます。
+'''
+
+[[dependencies.fishplayermod]]
+    modId="forge"
+    mandatory=true
+    versionRange="[36.2.0,)"
+    ordering="NONE"
+    side="BOTH"
