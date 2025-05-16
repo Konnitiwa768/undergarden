@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/inner_stairs",
-  "textures": {
-    "side": "undergarden:block/tremblecrust",
-    "bottom": "undergarden:block/tremblecrust",
-    "top": "undergarden:block/tremblecrust"
-  }
-}

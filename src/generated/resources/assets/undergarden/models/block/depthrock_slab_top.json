@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/slab_top",
-  "textures": {
-    "side": "undergarden:block/depthrock",
-    "bottom": "undergarden:block/depthrock",
-    "top": "undergarden:block/depthrock"
-  }
-}
