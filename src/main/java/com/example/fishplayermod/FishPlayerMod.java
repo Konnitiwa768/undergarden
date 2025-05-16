@@ -1,16 +1,18 @@
 package com.example.fishplayermod;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
-import net.minecraft.client.renderer.entity.EntityRendererManager;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.Matrix4f;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.passive.fish.SalmonEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.passive.fish.SalmonEntity;
+import net.minecraft.util.math.vector.MatrixStack;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderPlayerEvent;
+import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -22,28 +24,35 @@ public class FishPlayerMod {
     }
 
     @SubscribeEvent
-    public void onRenderPlayer(RenderPlayerEvent.Pre event) {
-        PlayerEntity player = event.getPlayer();
-        // 条件を簡単に true にして常に鮭表示
-        if (!player.world.isRemote) return; // サーバー側は処理しない
+    public void onPlayerTick(TickEvent.PlayerTickEvent event) {
+        PlayerEntity player = event.player;
 
-        event.setCanceled(true); // プレイヤーの描画をキャンセル
-
-        SalmonEntity salmon = new SalmonEntity(EntityType.SALMON, player.world);
-        salmon.setPosition(player.getPosX(), player.getPosY(), player.getPosZ());
-        salmon.rotationYaw = player.rotationYaw;
-        salmon.rotationPitch = player.rotationPitch;
-
-        EntityRendererManager renderManager = Minecraft.getInstance().getRenderManager();
-        EntityRenderer<? super SalmonEntity> renderer = renderManager.getRenderer(salmon);
-
-        if (renderer != null) {
-            MatrixStack matrixStack = event.getMatrixStack();
-            IRenderTypeBuffer buffer = event.getBuffers();
-            int light = event.getLight();
-            float partialTicks = event.getPartialRenderTick();
-
-            renderer.render(salmon, partialTicks, matrixStack, buffer, light);
+        // クライアント側でのみ処理
+        if (player.level.isClientSide) {
+            renderFishOnPlayer(player);
         }
+    }
+
+    private void renderFishOnPlayer(PlayerEntity player) {
+        // サーモンの生成
+        SalmonEntity salmon = new SalmonEntity(EntityType.SALMON, player.level);
+        salmon.setPos(player.getX(), player.getY(), player.getZ());
+        salmon.setYRot(player.getYRot());
+        salmon.setXRot(player.getXRot());
+
+        // レンダリング関連の取得
+        EntityRenderDispatcher dispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
+        EntityRenderer<? super SalmonEntity> renderer = dispatcher.getRenderer(salmon);
+
+        // 描画準備
+        MatrixStack matrixStack = new MatrixStack();
+        IRenderTypeBuffer.Impl buffer = Minecraft.getInstance().renderBuffers().bufferSource();
+        float partialTicks = Minecraft.getInstance().getFrameTime();
+        int light = 15728880; // 通常の明るさ
+
+        // 描画実行
+        renderer.render(salmon, salmon.getYRot(), partialTicks, matrixStack, buffer, light);
+
+        buffer.endBatch();
     }
 }
